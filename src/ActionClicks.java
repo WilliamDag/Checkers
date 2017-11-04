@@ -46,12 +46,18 @@ public class ActionClicks implements ActionListener
 			}
 		}
 	}
+
+	//Make the AI move after 1 second
+	private static void waitThenMove()
+	{
+		Timer timer = new Timer();
+		timer.schedule(new AIPlayer(), 1000);
+	}
 	
 	public void actionPerformed(ActionEvent e)
 	{
 		if(gameType == HUMANGAME)
 		{
-			//Piece.changeTileStates(); //Disable clicking on any square that doesn't have a Piece on it.
 			if(turnStage == checkForJumps) //Check for any jumps at the start of a move and highlight them, making the available move squares active.
 			{
 				if(Move.highlightJumps(playerTurn))
@@ -74,6 +80,7 @@ public class ActionClicks implements ActionListener
 						Move.destinationY = (Integer) btn.getClientProperty("row");
 						if(Move.makeJump(Move.originX, Move.originY, Move.destinationX, Move.destinationY)) //Make the jump
 						{
+							History.addToHistory();
 							turnStage = checkForDoubleJumps;
 						}
 						else //If the destination clicked on wasn't valid, reset the move coordinates.
@@ -98,6 +105,7 @@ public class ActionClicks implements ActionListener
 					Move.destinationY = (Integer) btn.getClientProperty("row");
 					if(Move.makeJump(Move.originX, Move.originY, Move.destinationX, Move.destinationY)) //Make the jump
 					{
+						History.addToHistory();
 						Move.possibleDoubleJumps = 0;
 						if(!Move.highlightDoubleJumps(playerTurn))
 						{
@@ -140,6 +148,7 @@ public class ActionClicks implements ActionListener
 						if(Move.canMove(playerTurn,Move.originX,Move.originY,Move.destinationX,Move.destinationY)) //If the piece can move
 						{
 							Move.makeMove(Move.originX, Move.originY, Move.destinationX, Move.destinationY); //Then make move
+							History.addToHistory();
 							Move.changePlayer(); //Change players
 							resetBorderHighlights(); //Remove the highlights from the board
 							turnStage = checkForJumps;
@@ -148,6 +157,124 @@ public class ActionClicks implements ActionListener
 						{
 							Checkers.message.setText("Invalid move.");
 							sourceSet = false;
+						}
+					}
+				}
+			}
+		}
+		if(gameType == AIGAME)
+		{
+			if(playerTurn == BLACKPLAYER)
+			{
+				if(turnStage == checkForJumps) //Check for any jumps at the start of a move and highlight them, making the available move squares active.
+				{
+					if(Move.highlightJumps(BLACKPLAYER))
+					{
+						Checkers.message.setText("You must jump!");
+						if(!sourceSet) //If no piece has been selected, get the user to select one.
+						{
+							JButton btn = (JButton) e.getSource(); //Get X & Y coordinates from the ActionListener source "Click".
+							Move.originX = (Integer) btn.getClientProperty("column");
+							Move.originY = (Integer) btn.getClientProperty("row");
+							if(Move.whosPiece(BLACKPLAYER, Move.originX, Move.originY)) //Check the piece clicked on can be moved by the current player.
+							{
+								Move.clickAPiece(); //Set the X & Y origin coords to the Move variables and set "sourceSet" to TRUE.
+							}
+						}
+						else //If a source has been set, have the next click set the destination coords.
+						{
+							JButton btn = (JButton) e.getSource();
+							Move.destinationX = (Integer) btn.getClientProperty("column");
+							Move.destinationY = (Integer) btn.getClientProperty("row");
+							if(Move.makeJump(Move.originX, Move.originY, Move.destinationX, Move.destinationY)) //Make the jump
+							{
+								History.addToHistory();
+								turnStage = checkForDoubleJumps;
+							}
+							else //If the destination clicked on wasn't valid, reset the move coordinates.
+							{
+								Checkers.message.setText("Invalid move.");
+								sourceSet = false;
+							}
+						}
+					}
+					else
+					{
+						turnStage = checkForMoves;
+					}
+				}
+				if(turnStage == checkForDoubleJumps)
+				{
+					if(Move.possibleDoubleJumps > 0)
+					{
+						Checkers.message.setText("You must keep jumping!");
+						JButton btn = (JButton) e.getSource();
+						Move.destinationX = (Integer) btn.getClientProperty("column");
+						Move.destinationY = (Integer) btn.getClientProperty("row");
+						if(Move.makeJump(Move.originX, Move.originY, Move.destinationX, Move.destinationY)) //Make the jump
+						{
+							History.addToHistory();
+							Move.possibleDoubleJumps = 0;
+							if(!Move.highlightDoubleJumps(playerTurn))
+							{
+								resetBorderHighlights();
+								Move.changePlayer();
+								System.out.println(AIPlayer.computerPieces);
+								AIPlayer.getRandomPieceDest();
+								waitThenMove();
+								turnStage = checkForMoves;
+							}
+						}
+						else //If the destination clicked on wasn't valid, reset the move coordinates.
+						{
+							//resetBorderHighlights();
+							Checkers.message.setText("Invalid move.");
+						}
+					}
+					else
+					{
+						Move.changePlayer();
+						System.out.println(AIPlayer.computerPieces);
+						AIPlayer.getRandomPieceDest();
+						waitThenMove();
+						turnStage = checkForJumps;
+					}
+				}
+				if(turnStage == checkForMoves)
+				{
+					if(Move.highlightMoves(playerTurn)) //Highlight any possible moves for current player
+					{
+						if(!sourceSet) //Get X & Y coordinates from the ActionListener source "Click".
+						{
+							JButton btn = (JButton) e.getSource();
+							Move.originX = (Integer) btn.getClientProperty("column");
+							Move.originY = (Integer) btn.getClientProperty("row");
+							if(Move.whosPiece(playerTurn, Move.originX, Move.originY))
+							{
+								Move.clickAPiece();
+							}
+						}
+						else //If source is set then get the destination coords on next click.
+						{
+							JButton btn = (JButton) e.getSource();
+							Move.destinationX = (Integer) btn.getClientProperty("column");
+							Move.destinationY = (Integer) btn.getClientProperty("row");
+							if(Move.canMove(playerTurn,Move.originX,Move.originY,Move.destinationX,Move.destinationY)) //If the piece can move
+							{
+								Move.makeMove(Move.originX, Move.originY, Move.destinationX, Move.destinationY); //Then make move
+								History.addToHistory();
+								Move.changePlayer(); //Change players
+								System.out.println(AIPlayer.computerPieces);
+								AIPlayer.getRandomPieceDest();
+								waitThenMove();
+								resetBorderHighlights(); //Remove the highlights from the board
+								turnStage = checkForJumps;
+							}
+							else //If the destination clicked on wasn't valid, reset the move coordinates.
+							{
+								Checkers.message.setText("Invalid move.");
+								sourceSet = false;
+							}
 						}
 					}
 				}
