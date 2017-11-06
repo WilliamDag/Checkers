@@ -3,14 +3,21 @@ package checkers;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Checkers extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private final static String VERSION = "1.0";
+	public static boolean gameInProgress;
 	public static JPanel guiJPanel = new JPanel(new BorderLayout(2, 1));
 	public static String messageText;
-	public static JLabel message = new JLabel("Welcome to Checkers 1.0");
+	public static JLabel message = new JLabel("Welcome to Checkers " + VERSION);
+	private static ActionClicks actions;
+	JMenuBar menuBar;
+	JMenu menu;
+	JMenuItem menuItem;
 	
 	//Constructor
 	private Checkers()
@@ -34,13 +41,14 @@ public class Checkers extends JPanel
 	private void gui()
 	{
 		repaint();
-		//Setup ToolBar for Main Window on GUI
-		JToolBar toolBar = new JToolBar();
-		toolBar.setFloatable(false);
-		toolBar.setBackground(Color.WHITE);
-		guiJPanel.add(toolBar, BorderLayout.PAGE_START);
-		//Add ToolBar buttons with JButtons
-		Action newGameAction = new AbstractAction("New")
+		//Create the menu bar.
+		menuBar = new JMenuBar();
+		menuBar.setBackground(Color.WHITE);
+		guiJPanel.add(menuBar, BorderLayout.PAGE_START);
+		//Build the first menu.
+		menu = new JMenu("Game");
+		menuBar.add(menu);
+		Action newGameAction = new AbstractAction("Player v Player")
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
@@ -48,10 +56,16 @@ public class Checkers extends JPanel
 				newGame("Let's begin! Black moves first.");
 			}
 		};
-		toolBar.add(newGameAction);
-		toolBar.add(new JButton("Save")); //TODO - Add Functionality
-		toolBar.add(new JButton("Load")); //TODO - Add Functionality
-		toolBar.add(new JButton("Undo")); //TODO - Add Functionality
+		menu.add(newGameAction);
+		Action newAIGameAction = new AbstractAction("Player v Computer")
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				newAIGame("Let's begin! Black moves first.");
+			}
+		};
+		menu.add(newAIGameAction);
 		Action quitGameAction = new AbstractAction("Quit")
 		{
 			@Override
@@ -60,24 +74,165 @@ public class Checkers extends JPanel
 				quitGame("Game Quit. Shall we play again?");
 			}
 		};
-		toolBar.add(quitGameAction);
-		toolBar.addSeparator();
+		menu.add(quitGameAction);
+		
+		//Build second menu in the menu bar.
+		menu = new JMenu("Options");
+		menuBar.add(menu);
+		//Undo the last move
+		Action undoMoveAction = new AbstractAction("Undo   'U'")
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				History.undoLastMove();
+			}
+		};
+		menu.add(undoMoveAction);
+        menu.getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW).
+        put(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U,0), "U_pressed");
+        menu.getActionMap().put("U_pressed", undoMoveAction);
+        
+		//Redo the last move
+		Action redoMoveAction = new AbstractAction("Redo   'R'")
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				History.redoLastMove();
+			}
+		};
+		menu.add(redoMoveAction);
+        menu.getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW).
+        put(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R,0), "R_pressed");
+        menu.getActionMap().put("R_pressed", redoMoveAction);
+        
+		//Save the game
+		Action saveGameAction = new AbstractAction("Save")
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+		        JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir") + "/history/"));
+		        int returnValue = fileChooser.showSaveDialog(null);
+		        if (returnValue == JFileChooser.APPROVE_OPTION)
+		        {
+					try
+					{
+						History.fileName = fileChooser.getSelectedFile().toString();
+						History.storeHistory();
+					}
+					catch (FileNotFoundException ex)
+					{
+						ex.printStackTrace();
+					}
+		        }
+			}
+		};
+		menu.add(saveGameAction);
+		//Load a saved game
+		Action loadGameAction = new AbstractAction("Load Saved Game")
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+		        JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir") + "/history/"));
+		        int returnValue = fileChooser.showOpenDialog(null);
+		        if (returnValue == JFileChooser.APPROVE_OPTION)
+		        {
+		        	History.selectedFile = fileChooser.getSelectedFile();
+		        	History.loadSavedGame();
+		        }
+			}
+		};
+		menu.add(loadGameAction);
+		//Watch a replay of a saved game
+		Action watchGameAction = new AbstractAction("Watch Replay")
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+		        JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir") + "/history/"));
+		        int returnValue = fileChooser.showOpenDialog(null);
+		        if (returnValue == JFileChooser.APPROVE_OPTION)
+		        {
+		        	History.selectedFile = fileChooser.getSelectedFile();
+					History.openHistoryThread();
+		        }
+			}
+		};
+		menu.add(watchGameAction);
+		menu = new JMenu("----------");
+		menuBar.add(menu);
+		menu.setEnabled(false);
+		menuBar.add(message);
 		message.setFont (message.getFont ().deriveFont (20.0f));
-		toolBar.add(message);
 		Board board = new Board();
 	}
 	
-	private static void newGame(String messageText)
+	//Start a new PvP game
+	public static void newGame(String messageText)
 	{
-		message.setText(messageText);
-
+		if(gameInProgress)
+		{
+			JOptionPane.showMessageDialog(guiJPanel, "You must finish or quit this game first!");
+		}
+		else
+		{
+			ActionClicks.gameType = ActionClicks.HUMANGAME;
+			System.out.println("Human Game Started.");
+			message.setText(messageText);
+			ActionClicks.playerTurn = ActionClicks.BLACKPLAYER;
+			Piece.setupNewGame();
+			ActionClicks.sourceSet = false;
+			ActionClicks.resetBorderHighlights();
+			ActionClicks.turnStage = ActionClicks.checkForJumps;
+			gameInProgress = true;
+			actions = new ActionClicks();
+		}
 	}
 	
+	//Start a new AI Game
+	private static void newAIGame(String messageText)
+	{
+		if(gameInProgress)
+		{
+			JOptionPane.showMessageDialog(guiJPanel, "You must finish or quit this game first!");
+		}
+		else
+		{
+			ActionClicks.gameType = ActionClicks.AIGAME;
+			System.out.println("AI Game Started.");
+			message.setText(messageText);
+			ActionClicks.playerTurn = ActionClicks.BLACKPLAYER;
+			Piece.setupNewGame();
+			ActionClicks.sourceSet = false;
+			ActionClicks.resetBorderHighlights();
+			ActionClicks.turnStage = ActionClicks.checkForJumps;
+			AIPlayer.getAIPieces();
+			gameInProgress = true;
+			actions = new ActionClicks();
+		}
+	}
+	
+	//Quit the current game
 	private static void quitGame(String messageText)
 	{
-		message.setText(messageText);
+		int quit = JOptionPane.showConfirmDialog(guiJPanel, "Are you sure you want to quit this game?");
+		if (quit == JOptionPane.YES_OPTION)
+		{
+			Piece.clearPieces();
+			gameInProgress = false;
+			ActionClicks.resetBorderHighlights();
+			message.setText(messageText);
+		}
+		if (quit == JOptionPane.NO_OPTION || quit == JOptionPane.CANCEL_OPTION)
+		{
+			message.setText("Let's get back to the game!");
+		}
 	}
 	
+	//Main Method
 	public static void main(String[] args)
 	{
 		SwingUtilities.invokeLater(new Runnable()

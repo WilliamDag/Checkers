@@ -49,16 +49,15 @@ public class Board
 			}
 		};
 		board.setBackground(Color.WHITE);
-		board.setBorder(new CompoundBorder(new EmptyBorder(20, 20, 20, 20), new LineBorder(Color.black)));
 		JPanel constrain = new JPanel(new GridBagLayout());
 		constrain.setBackground(Color.WHITE);
 		constrain.add(board);
 		Checkers.guiJPanel.add(constrain);
 		//Add Checkers Board squares using Insets & JButtons
 		Insets buttonMargin = new Insets(0, 0, 0, 0);
-		for (int i = 0; i < boardSquares.length; i++)
+		for (int i = 0; i < 8; i++)
 		{
-			for (int j = 0; j < boardSquares[i].length; j++)
+			for (int j = 0; j < 8; j++)
 			{
 				JButton button = new JButton();
 				button.setMargin(buttonMargin);
@@ -77,7 +76,7 @@ public class Board
 				boardSquares[j][i].putClientProperty("row", i);
 				boardSquares[j][i].setEnabled(false);
 			}
-		}	
+		}
 		
 		//Fill the Board with Labels
 		board.add(new JLabel(""));
