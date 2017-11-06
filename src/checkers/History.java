@@ -1,6 +1,9 @@
 package checkers;
 
 import java.util.List;
+
+import javax.swing.JOptionPane;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,6 +23,12 @@ public class History
 	private static int destinationXCounter = -2;
 	private static int destinationYCounter = -1;
 	private static int turnCounter = 0;
+	
+	public static void clearLists()
+	{
+		historyOfMoves.clear();
+		undoList.clear();
+	}
 	
 	public static void undoLastMove()
 	{
@@ -116,6 +125,7 @@ public class History
 					originYCounter = originYCounter + 4;
 					destinationXCounter = destinationXCounter + 4;
 					destinationYCounter = destinationYCounter + 4;
+					System.out.println(destinationYCounter);
 				}
 			}
 			System.out.println(undoList);
@@ -152,9 +162,10 @@ public class History
 		System.out.println(undoList);
 		try
 		{
-			if(turnCounter > 0 && destinationYCounter != -1)
+			if(destinationYCounter != -1)
 			{
-				undoList.subList(destinationYCounter + 1, undoList.size()).clear();
+				System.out.println("Clearing from " + destinationYCounter +1 + " onwards.");	
+				undoList.subList(undoList.size() + destinationYCounter + 1, undoList.size()).clear();
 				originXCounter = -4;
 				originYCounter = -3;
 				destinationXCounter = -2;
@@ -175,44 +186,53 @@ public class History
 	
 	public static void loadSavedGame()
 	{
-		Checkers.newGame("Loading saved game.");
-	    try (BufferedReader br = new BufferedReader(new FileReader(selectedFile)))
-	    {
-	        String line;
-	        while ((line = br.readLine()) != null)
-	        {
-        		int originX = Integer.parseInt(line.substring(0,1));
-        		System.out.println(originX);
-        		int originY = Integer.parseInt(line.substring(1,2));
-        		System.out.println(originY);
-        		int destinationX = Integer.parseInt(line.substring(2,3));
-        		System.out.println(destinationX);
-        		int destinationY = Integer.parseInt(line.substring(3));
-        		System.out.println(destinationY);
-    			if((destinationX == originX + 2) || (destinationX == originX - 2))
-    			{
-        			Move.makeJump(originX, originY, destinationX, destinationY);
-        			System.out.println("Jumping: " + originX + " " + originY + " " + destinationX + " " + destinationY);
-        			Move.changePlayer();
-    			}
-    			else
-    			{
-        			Move.makeMove(originX, originY, destinationX, destinationY);
-        			System.out.println("Moving: " + originX + " " + originY + " " + destinationX + " " + destinationY);
-        			Move.changePlayer();
-    			}
-		    }
-   		}
-   		catch (FileNotFoundException e)
-   		{
-   			e.printStackTrace();
-			System.err.println("Error: File can't be read.");
+		if(Checkers.gameInProgress)
+		{
+			JOptionPane.showMessageDialog(Checkers.guiJPanel, "You must finish or quit this game first!");
 		}
-    	catch (IOException e)
-    	{
-    		e.printStackTrace();
-    		System.err.println("Error: File can't be read.");
-    	}
+		else
+		{
+			Checkers.newGame("Loading saved game.");
+		    try (BufferedReader br = new BufferedReader(new FileReader(selectedFile)))
+		    {
+		        String line;
+		        while ((line = br.readLine()) != null)
+		        {
+	        		int originX = Integer.parseInt(line.substring(0,1));
+	        		System.out.println(originX);
+	        		int originY = Integer.parseInt(line.substring(1,2));
+	        		System.out.println(originY);
+	        		int destinationX = Integer.parseInt(line.substring(2,3));
+	        		System.out.println(destinationX);
+	        		int destinationY = Integer.parseInt(line.substring(3));
+	        		System.out.println(destinationY);
+	    			if((destinationX == originX + 2) || (destinationX == originX - 2))
+	    			{
+	        			Move.makeJump(originX, originY, destinationX, destinationY);
+	        			System.out.println("Jumping: " + originX + " " + originY + " " + destinationX + " " + destinationY);
+	        			Move.changePlayer();
+	    			}
+	    			else
+	    			{
+	        			Move.makeMove(originX, originY, destinationX, destinationY);
+	        			System.out.println("Moving: " + originX + " " + originY + " " + destinationX + " " + destinationY);
+	        			Move.changePlayer();
+	    			}
+			    }
+				History.clearLists();
+				Checkers.gameInProgress = true;
+	   		}
+	   		catch (FileNotFoundException e)
+	   		{
+	   			e.printStackTrace();
+				System.err.println("Error: File can't be read.");
+			}
+	    	catch (IOException e)
+	    	{
+	    		e.printStackTrace();
+	    		System.err.println("Error: File can't be read.");
+	    	}
+		}
 	}
 	
 	public static void openHistoryThread()

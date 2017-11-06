@@ -189,6 +189,7 @@ public class Checkers extends JPanel
 			ActionClicks.turnStage = ActionClicks.checkForJumps;
 			gameInProgress = true;
 			actions = new ActionClicks();
+			History.clearLists();
 		}
 	}
 	
@@ -212,6 +213,7 @@ public class Checkers extends JPanel
 			AIPlayer.getAIPieces();
 			gameInProgress = true;
 			actions = new ActionClicks();
+			History.clearLists();
 		}
 	}
 	
@@ -223,8 +225,10 @@ public class Checkers extends JPanel
 		{
 			Piece.clearPieces();
 			gameInProgress = false;
+			actions = new ActionClicks();
 			ActionClicks.resetBorderHighlights();
 			message.setText(messageText);
+			History.clearLists();
 		}
 		if (quit == JOptionPane.NO_OPTION || quit == JOptionPane.CANCEL_OPTION)
 		{
