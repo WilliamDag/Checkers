@@ -2,9 +2,8 @@ package checkers;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.TimerTask;
 
-public class AIPlayer extends TimerTask
+public class AIPlayer
 {
 	//List to store integer coordinates of the AI controlled (red) pieces. List used as it is mutable.
 	public static ArrayList<String> computerPieces = new ArrayList<String>();
@@ -14,12 +13,6 @@ public class AIPlayer extends TimerTask
 	private static int randomDest;
 	private static int randomSourceX, randomSourceY;
 
-	//Make the AI move after 1 second
-	@Override
-	public void run()
-	{
-		makeAIMove();
-	}
 	
 	public static void getAIPieces()
 	{
@@ -64,9 +57,7 @@ public class AIPlayer extends TimerTask
 		Random randomJumpSource = new Random();
 		randomJump = computerJumps.get(randomJumpSource.nextInt(computerJumps.size()));
 		randomSourceX = Integer.parseInt(randomJump.substring(0,1));
-		System.out.println(randomSourceX);
 		randomSourceY = Integer.parseInt(randomJump.substring(1,2));
-		System.out.println(randomSourceY);
 		Move.originX = randomSourceX;
 		Move.originY = randomSourceY;
 	}
@@ -102,7 +93,6 @@ public class AIPlayer extends TimerTask
 					Move.destinationY = Move.originY + 2;
 					Move.makeJump(Move.originX, Move.originY, Move.originX + 2, Move.originY + 2);
 					History.addToHistory();
-					System.out.println("Trying to make move..+2+2");
 					if(Move.possibleDoubleJumps > 0)
 					{
 						Move.possibleDoubleJumps = 0;
@@ -113,7 +103,6 @@ public class AIPlayer extends TimerTask
 					else
 					{
 						Move.changePlayer();
-						System.out.println("No more double jumps");
 					}
 				}
 				else
@@ -138,7 +127,6 @@ public class AIPlayer extends TimerTask
 					Move.destinationY = Move.originY - 2;
 					Move.makeJump(Move.originX, Move.originY, Move.originX + 2, Move.originY - 2);
 					History.addToHistory();
-					System.out.println("Trying to make move..+2-2");
 					if(Move.possibleDoubleJumps > 0)
 					{
 						Move.possibleDoubleJumps = 0;
@@ -149,7 +137,6 @@ public class AIPlayer extends TimerTask
 					else
 					{
 						Move.changePlayer();
-						System.out.println("No more double jumps");
 					}
 				}
 				else
@@ -174,7 +161,6 @@ public class AIPlayer extends TimerTask
 					Move.destinationY = Move.originY + 2;
 					Move.makeJump(Move.originX, Move.originY, Move.originX - 2, Move.originY + 2);
 					History.addToHistory();
-					System.out.println("Trying to make move..-2+2");
 					if(Move.possibleDoubleJumps > 0)
 					{
 						Move.possibleDoubleJumps = 0;
@@ -185,7 +171,6 @@ public class AIPlayer extends TimerTask
 					else
 					{
 						Move.changePlayer();
-						System.out.println("No more double jumps");
 					}
 				}
 				else
@@ -210,7 +195,6 @@ public class AIPlayer extends TimerTask
 					Move.destinationY = Move.originY - 2;
 					Move.makeJump(Move.originX, Move.originY, Move.originX - 2, Move.originY - 2);
 					History.addToHistory();
-					System.out.println("Trying to make move..-2-2");
 					if(Move.possibleDoubleJumps > 0)
 					{
 						Move.possibleDoubleJumps = 0;
@@ -221,7 +205,6 @@ public class AIPlayer extends TimerTask
 					else
 					{
 						Move.changePlayer();
-						System.out.println("No more double jumps");
 					}
 				}
 				else
@@ -239,7 +222,7 @@ public class AIPlayer extends TimerTask
 	}
 	
 	//Make an AI move.
-	private static void makeAIMove()
+	public static void makeAIMove()
 	{
 		//Check for jumps first.
 		if(Move.highlightJumps(ActionClicks.REDPLAYER))

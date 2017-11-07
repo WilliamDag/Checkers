@@ -2,8 +2,6 @@ package checkers;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Timer;
-
 import javax.swing.JButton;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -50,8 +48,21 @@ public class ActionClicks implements ActionListener
 	//Make the AI move after 1 second
 	private static void waitThenMove()
 	{
-		Timer timer = new Timer();
-		timer.schedule(new AIPlayer(), 1000);
+	    new Thread(new Runnable()
+	    {
+			@Override
+			public void run() {
+				try
+				{
+					Thread.sleep(1000);
+					AIPlayer.makeAIMove();
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}
+	    }).start();
 	}
 	
 	public void actionPerformed(ActionEvent e)
@@ -219,7 +230,6 @@ public class ActionClicks implements ActionListener
 							{
 								resetBorderHighlights();
 								Move.changePlayer();
-								System.out.println(AIPlayer.computerPieces);
 								AIPlayer.getRandomPieceDest();
 								waitThenMove();
 								turnStage = checkForMoves;
@@ -234,7 +244,6 @@ public class ActionClicks implements ActionListener
 					else
 					{
 						Move.changePlayer();
-						System.out.println(AIPlayer.computerPieces);
 						AIPlayer.getRandomPieceDest();
 						waitThenMove();
 						turnStage = checkForJumps;
@@ -264,7 +273,6 @@ public class ActionClicks implements ActionListener
 								Move.makeMove(Move.originX, Move.originY, Move.destinationX, Move.destinationY); //Then make move
 								History.addToHistory();
 								Move.changePlayer(); //Change players
-								System.out.println(AIPlayer.computerPieces);
 								AIPlayer.getRandomPieceDest();
 								waitThenMove();
 								resetBorderHighlights(); //Remove the highlights from the board

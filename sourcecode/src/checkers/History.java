@@ -42,23 +42,17 @@ public class History
 				destinationYCounter = -1;
 			}
 			int lastOriginX = Integer.parseInt(undoList.get(undoList.size() +originXCounter));
-			System.out.println(lastOriginX);
 			int lastOriginY = Integer.parseInt(undoList.get(undoList.size() +originYCounter));
-			System.out.println(lastOriginY);
 			int lastDestinationX = Integer.parseInt(undoList.get(undoList.size() +destinationXCounter));
-			System.out.println(lastDestinationX);
 			int lastDestinationY = Integer.parseInt(undoList.get(undoList.size() +destinationYCounter));
-			System.out.println(lastDestinationY);
 			if((lastDestinationX == lastOriginX + 2) || (lastDestinationX == lastOriginX - 2))
 			{
-				System.out.println("Can't undo a jump!");
 				Checkers.message.setText("Can't undo a jump!");
 			}
 			else
 			{
 				if(ActionClicks.gameType == ActionClicks.AIGAME)
 				{
-					System.out.println("Can't use undo in an AI game!");
 					Checkers.message.setText("Can't use undo in an AI game!");
 				}
 				else
@@ -81,11 +75,9 @@ public class History
 					historyOfMoves.remove(historyOfMoves.size() -1);
 				}
 			}
-			System.out.println(undoList);
 		}
 		else
 		{
-			System.out.println("No move to undo!");
 			Checkers.message.setText("No move to undo!");
 		}
 	}
@@ -100,14 +92,12 @@ public class History
 			int lastDestinationY = Integer.parseInt(undoList.get(undoList.size() +destinationYCounter));
 			if((lastDestinationX == lastOriginX + 2) || (lastDestinationX == lastOriginX - 2))
 			{
-				System.out.println("Can't redo a jump!");
 				Checkers.message.setText("Can't redo a jump!");
 			}
 			else
 			{
 				if(ActionClicks.gameType == ActionClicks.AIGAME)
 				{
-					System.out.println("Can't use undo in an AI game!");
 					Checkers.message.setText("Can't use undo in an AI game!");
 				}
 				else
@@ -125,14 +115,11 @@ public class History
 					originYCounter = originYCounter + 4;
 					destinationXCounter = destinationXCounter + 4;
 					destinationYCounter = destinationYCounter + 4;
-					System.out.println(destinationYCounter);
 				}
 			}
-			System.out.println(undoList);
 		}
 		else
 		{
-			System.out.println("No move to redo!");
 			Checkers.message.setText("No move to redo!");
 		}
 	}
@@ -159,12 +146,10 @@ public class History
 	
 	private static void addToUndo()
 	{
-		System.out.println(undoList);
 		try
 		{
 			if(destinationYCounter != -1)
 			{
-				System.out.println("Clearing from " + destinationYCounter +1 + " onwards.");	
 				undoList.subList(undoList.size() + destinationYCounter + 1, undoList.size()).clear();
 				originXCounter = -4;
 				originYCounter = -3;
@@ -181,7 +166,6 @@ public class History
 		undoList.add(Integer.toString(Move.originY));
 		undoList.add(Integer.toString(Move.destinationX));
 		undoList.add(Integer.toString(Move.destinationY));
-		System.out.println(undoList);
 	}
 	
 	public static void loadSavedGame()
@@ -199,23 +183,17 @@ public class History
 		        while ((line = br.readLine()) != null)
 		        {
 	        		int originX = Integer.parseInt(line.substring(0,1));
-	        		System.out.println(originX);
 	        		int originY = Integer.parseInt(line.substring(1,2));
-	        		System.out.println(originY);
 	        		int destinationX = Integer.parseInt(line.substring(2,3));
-	        		System.out.println(destinationX);
 	        		int destinationY = Integer.parseInt(line.substring(3));
-	        		System.out.println(destinationY);
 	    			if((destinationX == originX + 2) || (destinationX == originX - 2))
 	    			{
 	        			Move.makeJump(originX, originY, destinationX, destinationY);
-	        			System.out.println("Jumping: " + originX + " " + originY + " " + destinationX + " " + destinationY);
 	        			Move.changePlayer();
 	    			}
 	    			else
 	    			{
 	        			Move.makeMove(originX, originY, destinationX, destinationY);
-	        			System.out.println("Moving: " + originX + " " + originY + " " + destinationX + " " + destinationY);
 	        			Move.changePlayer();
 	    			}
 			    }
@@ -263,25 +241,19 @@ public class History
 	        while ((line = br.readLine()) != null)
 	        {
         		int originX = Integer.parseInt(line.substring(0,1));
-        		System.out.println(originX);
         		int originY = Integer.parseInt(line.substring(1,2));
-        		System.out.println(originY);
         		int destinationX = Integer.parseInt(line.substring(2,3));
-        		System.out.println(destinationX);
         		int destinationY = Integer.parseInt(line.substring(3));
-        		System.out.println(destinationY);
     			if((destinationX == originX + 2) || (destinationX == originX - 2))
     			{
         			Move.makeJump(originX, originY, destinationX, destinationY);
         			ActionClicks.resetBorderHighlights();
-        			System.out.println("Jumping: " + originX + " " + originY + " " + destinationX + " " + destinationY);
         			Thread.sleep(1000);
     			}
     			else
     			{
         			Move.makeMove(originX, originY, destinationX, destinationY);
         			ActionClicks.resetBorderHighlights();
-        			System.out.println("Moving: " + originX + " " + originY + " " + destinationX + " " + destinationY);
         			Thread.sleep(1000);
     			}
 		    }
